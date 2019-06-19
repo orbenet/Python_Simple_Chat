@@ -19,6 +19,15 @@ def l_print(message):
     print(x)
 
 
+def w_print(message):
+    z = time.strftime("%z").split(" ")
+    _z = ''
+    for item in z:
+        _z += item[0]
+    x = "{} {}:~: --> ".format(datetime.datetime.now(), _z)
+    x = x + message
+    return x
+
 class ServerClass:
     def __init__(self, _ip, _port):
         self.ip = _ip
@@ -27,6 +36,7 @@ class ServerClass:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.chat_log = open("{}CHAT_LOG.txt".format(str(datetime.datetime.now()).replace(":", "-")), 'w')
         self.connected = True
+
     def delete_client_from_list(self,client):
         self.ClientInstanceList.remove(client)
 
@@ -45,7 +55,7 @@ class ServerClass:
             except socket.error:
                 self.connected = False
                 self.close_server()
-                
+
     def close_server(self):
         self.socket.close()
         self.chat_log.close()
@@ -73,10 +83,11 @@ class ClientInstance(Thread):
             data = self.conn.recv(1024).decode()
             if len(data) > 0:
                 _msg = (self.a[0] + " says::: " + data)
-                self.parent.chat_log.write(_msg)
+                self.parent.chat_log.write(w_print(_msg))
+                self.parent.chat_log.write("\n")
                 self.parent.chat_log.flush()
                 for client in self.parent.ClientInstanceList:
-                    client.conn.send(_msg.encode())
+                    client.conn.send(w_print(_msg).encode())
         except socket.error:
             self.parent.ClientInstanceList.remove(self)
             self.connected = False
